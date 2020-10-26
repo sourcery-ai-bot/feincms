@@ -49,10 +49,7 @@ def django_boolean_icon(field_val, alt_text=None, title=None):
     # Origin: contrib/admin/templatetags/admin_list.py
     BOOLEAN_MAPPING = {True: "yes", False: "no", None: "unknown"}
     alt_text = alt_text or BOOLEAN_MAPPING[field_val]
-    if title is not None:
-        title = 'title="%s" ' % title
-    else:
-        title = ""
+    title = 'title="%s" ' % title if title is not None else ""
     icon_url = static("feincms/img/icon-%s.gif" % BOOLEAN_MAPPING[field_val])
     return mark_safe('<img src="%s" alt="%s" %s/>' % (icon_url, alt_text, title))
 
@@ -533,34 +530,33 @@ class TreeEditor(ExtensionModelAdmin):
         trigger the post_delete hooks.)
         """
         # If this is True, the confirmation page has been displayed
-        if request.POST.get("post"):
-            n = 0
-            # TODO: The disable_mptt_updates / rebuild is a work around
-            # for what seems to be a mptt problem when deleting items
-            # in a loop. Revisit this, there should be a better solution.
-            with queryset.model.objects.disable_mptt_updates():
-                for obj in queryset:
-                    if self.has_delete_permission(request, obj):
-                        obj.delete()
-                        n += 1
-                        obj_display = force_text(obj)
-                        self.log_deletion(request, obj, obj_display)
-                    else:
-                        logger.warning(
-                            'Denied delete request by "%s" for object #%s',
-                            request.user,
-                            obj.id,
-                        )
-            if n > 0:
-                queryset.model.objects.rebuild()
-            self.message_user(
-                request, _("Successfully deleted %(count)d items.") % {"count": n}
-            )
-            # Return None to display the change list page again
-            return None
-        else:
+        if not request.POST.get("post"):
             # (ab)using the built-in action to display the confirmation page
             return delete_selected(self, request, queryset)
+        n = 0
+        # TODO: The disable_mptt_updates / rebuild is a work around
+        # for what seems to be a mptt problem when deleting items
+        # in a loop. Revisit this, there should be a better solution.
+        with queryset.model.objects.disable_mptt_updates():
+            for obj in queryset:
+                if self.has_delete_permission(request, obj):
+                    obj.delete()
+                    n += 1
+                    obj_display = force_text(obj)
+                    self.log_deletion(request, obj, obj_display)
+                else:
+                    logger.warning(
+                        'Denied delete request by "%s" for object #%s',
+                        request.user,
+                        obj.id,
+                    )
+        if n > 0:
+            queryset.model.objects.rebuild()
+        self.message_user(
+            request, _("Successfully deleted %(count)d items.") % {"count": n}
+        )
+        # Return None to display the change list page again
+        return None
 
     def get_actions(self, request):
         actions = super(TreeEditor, self).get_actions(request)

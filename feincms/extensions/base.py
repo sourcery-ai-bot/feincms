@@ -55,10 +55,7 @@ class ExtensionsMixin(object):
             elif hasattr(extension, "register"):
                 extension = extension.register
 
-            elif hasattr(extension, "__call__"):
-                pass
-
-            else:
+            elif not hasattr(extension, "__call__"):
                 raise ImproperlyConfigured(
                     "%s is not a valid extension for %s" % (ext, cls.__name__)
                 )

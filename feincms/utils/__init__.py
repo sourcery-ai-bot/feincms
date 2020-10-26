@@ -51,8 +51,7 @@ def get_model_instance(app_label, model_name, pk):
         return None
 
     try:
-        instance = model._default_manager.get(pk=pk)
-        return instance
+        return model._default_manager.get(pk=pk)
     except model.DoesNotExist:
         pass
 
@@ -87,13 +86,10 @@ def copy_model_instance(obj, exclude=None):
     """
 
     exclude = exclude or ()
-    initial = dict(
-        (f.name, getattr(obj, f.name))
-        for f in obj._meta.fields
-        if not isinstance(f, AutoField)
-        and f.name not in exclude
-        and f not in obj._meta.parents.values()
-    )
+    initial = {f.name: getattr(obj, f.name) for f in obj._meta.fields
+            if not isinstance(f, AutoField)
+            and f.name not in exclude
+            and f not in obj._meta.parents.values()}
     return obj.__class__(**initial)
 
 

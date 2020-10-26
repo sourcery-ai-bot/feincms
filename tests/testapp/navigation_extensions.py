@@ -8,8 +8,7 @@ class PassthroughExtension(NavigationExtension):
     name = "passthrough extension"
 
     def children(self, page, **kwargs):
-        for p in page.children.in_navigation():
-            yield p
+        yield from page.children.in_navigation()
 
 
 class PretenderExtension(NavigationExtension):

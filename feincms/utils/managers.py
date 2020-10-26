@@ -26,11 +26,7 @@ class ActiveAwareContentManagerMixin(object):
         """
         if cls.active_filters is not None:
             for filt in cls.active_filters.values() or ():
-                if callable(filt):
-                    queryset = filt(queryset)
-                else:
-                    queryset = queryset.filter(filt)
-
+                queryset = filt(queryset) if callable(filt) else queryset.filter(filt)
         return queryset
 
     @classmethod

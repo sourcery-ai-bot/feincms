@@ -142,12 +142,13 @@ class PagesTestCase(TestCase):
         try:
             self.client.get(url)
         except TemplateDoesNotExist as e:
-            if should_be:
-                if e.args != ("feincms_base.html",):
-                    raise
-            else:
-                if e.args != ("404.html",):
-                    raise
+            if (
+                should_be
+                and e.args != ("feincms_base.html",)
+                or not should_be
+                and e.args != ("404.html",)
+            ):
+                raise
 
     def test_01_tree_editor(self):
         self.login()

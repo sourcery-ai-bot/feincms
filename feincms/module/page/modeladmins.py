@@ -96,9 +96,13 @@ class PageAdmin(item_editor.ItemEditor, tree_editor.TreeEditor):
 
     def get_readonly_fields(self, request, obj=None):
         readonly = super(PageAdmin, self).get_readonly_fields(request, obj=obj)
-        if not settings.FEINCMS_SINGLETON_TEMPLATE_CHANGE_ALLOWED:
-            if obj and obj.template and obj.template.singleton:
-                return tuple(readonly) + ("template_key",)
+        if (
+            not settings.FEINCMS_SINGLETON_TEMPLATE_CHANGE_ALLOWED
+            and obj
+            and obj.template
+            and obj.template.singleton
+        ):
+            return tuple(readonly) + ("template_key",)
         return readonly
 
     def get_form(self, *args, **kwargs):
@@ -114,20 +118,19 @@ class PageAdmin(item_editor.ItemEditor, tree_editor.TreeEditor):
         )
         actions = super(PageAdmin, self)._actions_column(page)
 
-        if addable:
-            if not page.template.enforce_leaf:
-                actions.insert(
-                    0,
-                    '<a href="add/?parent=%s" title="%s">'
-                    '<img src="%s" alt="%s" />'
-                    "</a>"
-                    % (
-                        page.pk,
-                        _("Add child page"),
-                        static("feincms/img/icon_addlink.gif"),
-                        _("Add child page"),
-                    ),
-                )
+        if addable and not page.template.enforce_leaf:
+            actions.insert(
+                0,
+                '<a href="add/?parent=%s" title="%s">'
+                '<img src="%s" alt="%s" />'
+                "</a>"
+                % (
+                    page.pk,
+                    _("Add child page"),
+                    static("feincms/img/icon_addlink.gif"),
+                    _("Add child page"),
+                ),
+            )
         actions.insert(
             0,
             '<a href="%s" title="%s">'
@@ -216,9 +219,12 @@ class PageAdmin(item_editor.ItemEditor, tree_editor.TreeEditor):
         return HttpResponseRedirect(reverse("admin:page_page_changelist"))
 
     def has_delete_permission(self, request, obj=None):
-        if not settings.FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED:
-            if obj and obj.template.singleton:
-                return False
+        if (
+            not settings.FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED
+            and obj
+            and obj.template.singleton
+        ):
+            return False
         return super(PageAdmin, self).has_delete_permission(request, obj=obj)
 
     def changelist_view(self, request, *args, **kwargs):
@@ -260,10 +266,10 @@ class PageAdmin(item_editor.ItemEditor, tree_editor.TreeEditor):
             self.model.objects.active().values_list("id", flat=True)
         )
 
-        retval = []
-        for c in page.get_descendants(include_self=True):
-            retval.append(self.is_visible_admin(c))
-        return retval
+        return [
+            self.is_visible_admin(c)
+            for c in page.get_descendants(include_self=True)
+        ]
 
     is_visible_admin.editable_boolean_result = is_visible_recursive
 

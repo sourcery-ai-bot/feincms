@@ -414,7 +414,7 @@ class ApplicationContent(models.Model):
         # them and let the client worry about that.
         cc_headers = set(("must-revalidate",))
         for x in (cc.split(",") for cc in headers.get("Cache-Control", ())):
-            cc_headers |= set((s.strip() for s in x))
+            cc_headers |= {s.strip() for s in x}
 
         if len(cc_headers):
             response["Cache-Control"] = ", ".join(cc_headers)
@@ -423,12 +423,12 @@ class ApplicationContent(models.Model):
 
         # Check all Last-Modified headers, choose the latest one
         lm_list = [parsedate(x) for x in headers.get("Last-Modified", ())]
-        if len(lm_list) > 0:
+        if lm_list:
             response["Last-Modified"] = http_date(mktime(max(lm_list)))
 
         # Check all Expires headers, choose the earliest one
         lm_list = [parsedate(x) for x in headers.get("Expires", ())]
-        if len(lm_list) > 0:
+        if lm_list:
             response["Expires"] = http_date(mktime(min(lm_list)))
 
     @classmethod

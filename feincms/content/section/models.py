@@ -78,11 +78,7 @@ class SectionContent(models.Model):
         return cls.objects.select_related("parent", "mediafile").filter(filter_args)
 
     def render(self, **kwargs):
-        if self.mediafile:
-            mediafile_type = self.mediafile.type
-        else:
-            mediafile_type = "nomedia"
-
+        mediafile_type = self.mediafile.type if self.mediafile else "nomedia"
         return ct_render_to_string(
             [
                 "content/section/%s_%s.html" % (mediafile_type, self.type),

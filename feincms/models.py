@@ -137,10 +137,11 @@ class ContentProxy(object):
         if "counts" not in self._cache:
             counts = self._fetch_content_type_count_helper(self.item.pk)
 
-            empty_inherited_regions = set()
-            for region in self.item.template.regions:
-                if region.inherited and not counts.get(region.key):
-                    empty_inherited_regions.add(region.key)
+            empty_inherited_regions = {
+                region.key
+                for region in self.item.template.regions
+                if region.inherited and not counts.get(region.key)
+            }
 
             if empty_inherited_regions:
                 for parent in self._inherit_from():
@@ -240,10 +241,11 @@ class ContentProxy(object):
                 for instance in content_list:
                     contents.setdefault(instance.region, []).append(instance)
 
-            self._cache["regions"] = dict(
-                (region, sorted(instances, key=lambda c: c.ordering))
+            self._cache["regions"] = {
+                region: sorted(instances, key=lambda c: c.ordering)
                 for region, instances in contents.items()
-            )
+            }
+
 
         return self._cache["regions"]
 

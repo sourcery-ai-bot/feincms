@@ -214,9 +214,11 @@ class MediaFileBase(models.Model, ExtensionsMixin, TranslatedObjectMixin):
 
         # User uploaded a new file. Try to get rid of the old file in
         # storage, to avoid having orphaned files hanging around.
-        if getattr(self, "_original_file_name", None):
-            if self.file.name != self._original_file_name:
-                self.delete_mediafile(self._original_file_name)
+        if (
+            getattr(self, "_original_file_name", None)
+            and self.file.name != self._original_file_name
+        ):
+            self.delete_mediafile(self._original_file_name)
 
         self.purge_translation_cache()
 

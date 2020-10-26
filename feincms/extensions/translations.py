@@ -55,9 +55,7 @@ def user_has_language_set(request):
         and request.session.get(LANGUAGE_SESSION_KEY) is not None
     ):
         return True
-    if LANGUAGE_COOKIE_NAME in request.COOKIES:
-        return True
-    return False
+    return LANGUAGE_COOKIE_NAME in request.COOKIES
 
 
 # ------------------------------------------------------------------------

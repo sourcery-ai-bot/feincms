@@ -46,36 +46,35 @@ class TrackerContentProxy(ContentProxy):
         empty _ct_inventory.
         """
 
-        if "counts" not in self._cache:
-            if (
-                self.item._ct_inventory
-                and self.item._ct_inventory.get("_version_", -1) == INVENTORY_VERSION
-            ):
+        if "counts" not in self._cache and (
+            self.item._ct_inventory
+            and self.item._ct_inventory.get("_version_", -1) == INVENTORY_VERSION
+        ):
 
-                try:
-                    self._cache["counts"] = self._from_inventory(
-                        self.item._ct_inventory
-                    )
-                except KeyError:
-                    # It's possible that the inventory does not fit together
-                    # with the current models anymore, f.e. because a content
-                    # type has been removed.
-                    pass
-
-            if "counts" not in self._cache:
-                super(TrackerContentProxy, self)._fetch_content_type_counts()
-
-                self.item._ct_inventory = self._to_inventory(self._cache["counts"])
-
-                self.item.__class__.objects.filter(id=self.item.id).update(
-                    _ct_inventory=self.item._ct_inventory
+            try:
+                self._cache["counts"] = self._from_inventory(
+                    self.item._ct_inventory
                 )
+            except KeyError:
+                # It's possible that the inventory does not fit together
+                # with the current models anymore, f.e. because a content
+                # type has been removed.
+                pass
 
-                # Run post save handler by hand
-                if hasattr(self.item, "get_descendants"):
-                    self.item.get_descendants(include_self=False).update(
-                        _ct_inventory=None
-                    )
+        if "counts" not in self._cache:
+            super(TrackerContentProxy, self)._fetch_content_type_counts()
+
+            self.item._ct_inventory = self._to_inventory(self._cache["counts"])
+
+            self.item.__class__.objects.filter(id=self.item.id).update(
+                _ct_inventory=self.item._ct_inventory
+            )
+
+            # Run post save handler by hand
+            if hasattr(self.item, "get_descendants"):
+                self.item.get_descendants(include_self=False).update(
+                    _ct_inventory=None
+                )
         return self._cache["counts"]
 
     def _translation_map(self):
@@ -104,19 +103,20 @@ class TrackerContentProxy(ContentProxy):
 
         map = self._translation_map()
 
-        return dict(
-            (region, [(pk, map[-ct]) for pk, ct in items])
+        return {
+            region: [(pk, map[-ct]) for pk, ct in items]
             for region, items in inventory.items()
             if region != "_version_"
-        )
+        }
 
     def _to_inventory(self, counts):
         map = self._translation_map()
 
-        inventory = dict(
-            (region, [(pk, map[ct]) for pk, ct in items])
+        inventory = {
+            region: [(pk, map[ct]) for pk, ct in items]
             for region, items in counts.items()
-        )
+        }
+
         inventory["_version_"] = INVENTORY_VERSION
         return inventory
 

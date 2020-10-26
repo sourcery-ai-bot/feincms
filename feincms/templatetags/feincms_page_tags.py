@@ -217,7 +217,7 @@ class LanguageLinksNode(SimpleAssignmentNodeWithVarAndArgs):
             # Trailing path without first slash
             trailing_path = request._feincms_extra_context.get("extra_path", "")[1:]
 
-        translations = dict((t.language, t) for t in page.available_translations())
+        translations = {t.language: t for t in page.available_translations()}
         translations[page.language] = page
 
         links = []
@@ -254,7 +254,7 @@ def _translate_page_into(page, language, default=None):
             return page
 
         if language is not None:
-            translations = dict((t.language, t) for t in page.available_translations())
+            translations = {t.language: t for t in page.available_translations()}
             if language in translations:
                 return translations[language]
     except AttributeError:
@@ -464,7 +464,7 @@ def siblings_along_path_to(page_list, page2):
                 )
                 ancestors = (p,)
 
-            siblings = [
+            return [
                 a_page
                 for a_page in page_list
                 if (
@@ -473,8 +473,6 @@ def siblings_along_path_to(page_list, page2):
                     or any((_is_sibling_of(a_page, a) for a in ancestors))
                 )
             ]
-
-            return siblings
         except (AttributeError, ValueError) as e:
             logger.warn(
                 "siblings_along_path_to caught exception: %s", format_exception(e)

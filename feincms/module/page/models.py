@@ -301,15 +301,17 @@ class BasePage(create_base_model(MPTTModel), ContentModelMixin):
     save.alters_data = True
 
     def delete(self, *args, **kwargs):
-        if not settings.FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED:
-            if self.template.singleton:
-                raise PermissionDenied(
-                    _(
-                        "This %(page_class)s uses a singleton template, and "
-                        "FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED=False"
-                        % {"page_class": self._meta.verbose_name}
-                    )
+        if (
+            not settings.FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED
+            and self.template.singleton
+        ):
+            raise PermissionDenied(
+                _(
+                    "This %(page_class)s uses a singleton template, and "
+                    "FEINCMS_SINGLETON_TEMPLATE_DELETION_ALLOWED=False"
+                    % {"page_class": self._meta.verbose_name}
                 )
+            )
         super(BasePage, self).delete(*args, **kwargs)
 
     delete.alters_data = True

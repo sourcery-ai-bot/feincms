@@ -131,10 +131,7 @@ class Thumbnailer(object):
                 if format.lower() not in ("jpg", "jpeg", "png"):
                     format = "jpeg"
                 if image.mode not in ("RGBA", "RGB", "L"):
-                    if format == "png":
-                        image = image.convert("RGBA")
-                    else:
-                        image = image.convert("RGB")
+                    image = image.convert("RGBA") if format == "png" else image.convert("RGB")
                 image.save(buf, format, quality=90)
                 raw_data = buf.getvalue()
                 buf.close()
@@ -192,10 +189,7 @@ class CropscaleThumbnailer(Thumbnailer):
                 if format.lower() not in ("jpg", "jpeg", "png"):
                     format = "jpeg"
                 if image.mode not in ("RGBA", "RGB", "L"):
-                    if format == "png":
-                        image = image.convert("RGBA")
-                    else:
-                        image = image.convert("RGB")
+                    image = image.convert("RGBA") if format == "png" else image.convert("RGB")
                 image.save(buf, format, quality=90)
                 raw_data = buf.getvalue()
                 buf.close()
